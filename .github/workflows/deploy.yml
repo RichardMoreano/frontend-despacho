@@ -1,28 +1,76 @@
-name: Frontend Deploy Pipeline
+name: CI/CD - Frontend Deploy
 
 on:
   push:
-    branches:
-      - deploy
+    branches: [ deploy ]
 
 jobs:
-  docker:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login Docker Hub
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Build frontend (smoke check)
+        run: |
+          npm run build
+
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker Image
+      - name: Build and Push Frontend
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:latest .
-
-      - name: Push Docker Image
-        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:${{ github.sha }} .
+          docker tag ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:${{ github.sha }}
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:latest
+
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Desplegar Frontend en EC2 vía SSM
+        env:
+          DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:latest
+        run: |
+          echo "Enviando comando SSM a la instancia frontend: ${{ secrets.EC2_INSTANCE_ID_FRONTEND }}"
+          CMDID=$(aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID_FRONTEND }}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Despliegue frontend desde GitHub Actions" \
+            --parameters commands=["docker pull ${DOCKER_IMAGE}","docker stop frontend-despacho || true","docker rm frontend-despacho || true","docker run -d --name frontend-despacho -p 80:80 --restart always ${DOCKER_IMAGE}"] \
+            --query "Command.CommandId" --output text)
+          echo "SSM Command ID: $CMDID"
+          for i in {1..24}; do
+            STATUS=$(aws ssm get-command-invocation --command-id "$CMDID" --instance-id "${{ secrets.EC2_INSTANCE_ID_FRONTEND }}" --query 'Status' --output text 2>/dev/null || echo "Pending")
+            echo "Estado de invocación: $STATUS"
+            if [ "$STATUS" = "Success" ]; then
+              echo "Despliegue frontend exitoso"
+              exit 0
+            fi
+            if [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ] || [ "$STATUS" = "TimedOut" ]; then
+              echo "Despliegue falló con estado: $STATUS" >&2
+              aws ssm get-command-invocation --command-id "$CMDID" --instance-id "${{ secrets.EC2_INSTANCE_ID_FRONTEND }}" || true
+              exit 1
+            fi
+            sleep 5
+          done
+          echo "Timeout esperando resultado SSM" >&2
+          aws ssm get-command-invocation --command-id "$CMDID" --instance-id "${{ secrets.EC2_INSTANCE_ID_FRONTEND }}" || true
+          exit 1
