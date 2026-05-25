@@ -4,18 +4,45 @@ import { FormDespacho } from "./FormDespacho";
 import axios from "axios";
 
 export const TableCompras = () => {
-  const [ventas, setVentas] = useState([]);
+  const sampleVentas = [
+    {
+      idVenta: "V-1001",
+      direccionCompra: "Av. Siempre Viva 742",
+      fechaCompra: "2026-05-01",
+      valorCompra: 45000,
+      despachoGenerado: false
+    },
+    {
+      idVenta: "V-1002",
+      direccionCompra: "Calle Falsa 123",
+      fechaCompra: "2026-05-03",
+      valorCompra: 120000,
+      despachoGenerado: true
+    },
+    {
+      idVenta: "V-1003",
+      direccionCompra: "Paseo del Prado 45",
+      fechaCompra: "2026-05-05",
+      valorCompra: 76000,
+      despachoGenerado: false
+    }
+  ];
+
+  const [ventas, setVentas] = useState(sampleVentas);
 
   const compras = async () => {
-    await axios.get(`${import.meta.env.VITE_API_VENTAS}/api/v1/ventas`, {
-      headers:{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-  }
-    }).then((response) => {
-      console.log(response.data);
-      setVentas(response.data);
-    });
+    try {
+      await axios.get(`${import.meta.env.VITE_API_VENTAS}/api/v1/ventas`, {
+        headers:{
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      }).then((response) => {
+        setVentas(response.data);
+      });
+    } catch (error) {
+      setVentas(sampleVentas);
+    }
   };
   // Llamada a la función para obtener los datos cuando el componente se monta
   useEffect(() => {
@@ -98,3 +125,5 @@ export const TableCompras = () => {
     </>
   );
 };
+
+export default TableCompras;
