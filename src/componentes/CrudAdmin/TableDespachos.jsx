@@ -4,20 +4,53 @@ import { Modal } from "./Modal";
 import { FormCierreDespacho } from "./FormCierreDespacho";
 
 export const TableDespachos = () => {
-  const [despachos, setDespachos] = useState([]);
+  const sampleDespachos = [
+    {
+      idDespacho: "D-2001",
+      idCompra: "V-1002",
+      direccionCompra: "Calle Falsa 123",
+      fechaDespacho: "2026-05-04",
+      patenteCamion: "AB-1234",
+      entregado: true,
+      intento: 1
+    },
+    {
+      idDespacho: "D-2002",
+      idCompra: "V-1001",
+      direccionCompra: "Av. Siempre Viva 742",
+      fechaDespacho: "2026-05-06",
+      patenteCamion: "CD-5678",
+      entregado: false,
+      intento: 2
+    },
+    {
+      idDespacho: "D-2003",
+      idCompra: "V-1003",
+      direccionCompra: "Paseo del Prado 45",
+      fechaDespacho: "2026-05-07",
+      patenteCamion: "EF-9012",
+      entregado: false,
+      intento: 1
+    }
+  ];
+
+  const [despachos, setDespachos] = useState(sampleDespachos);
 
   const despacho = async () => {
-    await axios
-      .get(`${import.meta.env.VITE_API_DESPACHOS}/api/v1/despachos`, {
-        headers:{
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-        }
-      })
-      .then((response) => {
-        console.log(response.data);
-        setDespachos(response.data);
-      });
+    try {
+      await axios
+        .get(`${import.meta.env.VITE_API_DESPACHOS}/api/v1/despachos`, {
+          headers:{
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        })
+        .then((response) => {
+          setDespachos(response.data);
+        });
+    } catch (error) {
+      setDespachos(sampleDespachos);
+    }
   };
   // Llamada a la función para obtener los datos cuando el componente se monta
   useEffect(() => {
@@ -50,31 +83,17 @@ export const TableDespachos = () => {
                 </tr>
               </thead>
               <tbody>
-                {despachos
-               
-                .map((despacho) => (
+                {despachos.map((despacho) => (
                   <tr key={despacho.idDespacho}>
                     <td className="pr-10 py-10 items-center">{despacho.idDespacho}</td>
+                    <td className="pr-10 py-10  items-center">{despacho.idCompra}</td>
+                    <td className="pr-10 py-10  items-center">{despacho.direccionCompra}</td>
+                    <td className="pr-10 py-10  items-center">{despacho.fechaDespacho}</td>
+                    <td className="pr-10 py-10  items-center">{despacho.patenteCamion}</td>
                     <td className="pr-10 py-10  items-center">
-                      {despacho.idCompra}
+                      {despacho.entregado ? "Despacho entregado" : "Despacho pendiente"}
                     </td>
-                    <td className="pr-10 py-10  items-center">
-                      {despacho.direccionCompra}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {despacho.fechaDespacho}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {despacho.patenteCamion}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {despacho.entregado
-                        ? "Despacho entregado"
-                        : "Despacho pendiente"}
-                    </td>
-                    <td className="pr-10 py-10  items-center">
-                      {despacho.intento}
-                    </td>
+                    <td className="pr-10 py-10  items-center">{despacho.intento}</td>
                     <td>
                       <button
                         onClick={() => handleAbrirModal(despacho)}
@@ -100,8 +119,8 @@ export const TableDespachos = () => {
           <FormCierreDespacho
             despacho={despachoSeleccionado}
             onClose={() => {
-              //onclose es un prop que pasa funciones al modal con el form abierto, por ende al cerrarse, se ejecutan esas 2 funciones
-              setOpenModal(false), despacho();
+              setOpenModal(false);
+              despacho();
             }}
           />
         )}
@@ -109,3 +128,5 @@ export const TableDespachos = () => {
     </>
   );
 };
+
+export default TableDespachos;
