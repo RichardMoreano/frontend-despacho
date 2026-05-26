@@ -7,7 +7,7 @@ export const TableDespachos = () => {
   const sampleDespachos = [
     {
       idDespacho: "1",
-      idCompra: "3",
+      idCompra: "4",
       direccionCompra: "Calle Falsa 123",
       fechaDespacho: "2026-05-04",
       patenteCamion: "AB-1234",
@@ -16,7 +16,7 @@ export const TableDespachos = () => {
     },
     {
       idDespacho: "2",
-      idCompra: "4",
+      idCompra: "2",
       direccionCompra: "Av. Siempre Viva 742",
       fechaDespacho: "2026-05-06",
       patenteCamion: "CD-5678",
