@@ -18,10 +18,12 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
 
       - name: Build frontend (smoke check)
-        run: npm run build
+        run: |
+          npm run build
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -35,31 +37,3 @@ jobs:
           docker tag ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:${{ github.sha }}
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:latest
-
-      - name: Configurar SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2-key.pem
-          chmod 600 ~/.ssh/ec2-key.pem
-
-      - name: Deploy Frontend en EC2
-        env:
-          DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/frontend-despacho:latest
-        run: |
-          ssh -o StrictHostKeyChecking=no \
-          -i ~/.ssh/ec2-key.pem \
-          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
-
-          docker pull ${DOCKER_IMAGE}
-
-          docker stop frontend-despacho || true
-          docker rm frontend-despacho || true
-
-          docker run -d \
-            --name frontend-despacho \
-            -p 80:80 \
-            --restart always \
-            ${DOCKER_IMAGE}
-
-          docker ps
-          EOF
