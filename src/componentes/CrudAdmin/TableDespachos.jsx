@@ -9,7 +9,7 @@ export const TableDespachos = () => {
       idDespacho: "D-2001",
       idCompra: "V-1002",
       direccionCompra: "Calle Falsa 123",
-      fechaDespacho: "2026-05-04",
+      fechaDespacho: "2026-05-25",
       patenteCamion: "AB-1234",
       entregado: true,
       intento: 1
@@ -73,7 +73,7 @@ export const TableDespachos = () => {
             <table className="table-fixed">
               <thead>
                 <tr className="py-10">
-                  <th className="pr-10">Orden de despacho</th>
+                  <th className="pr-10">El profe lo pidio</th>
                   <th className="pr-10">Orden de compra</th>
                   <th className="pr-10">Dirección de entrega</th>
                   <th className="pr-10">Fecha despacho</th>
