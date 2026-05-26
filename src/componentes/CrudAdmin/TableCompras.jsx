@@ -6,21 +6,21 @@ import axios from "axios";
 export const TableCompras = () => {
   const sampleVentas = [
     {
-      idVenta: "V-1001",
+      idVenta: "3",
       direccionCompra: "Av. Siempre Viva 742",
       fechaCompra: "2026-05-01",
       valorCompra: 45000,
       despachoGenerado: false
     },
     {
-      idVenta: "V-1002",
+      idVenta: "4",
       direccionCompra: "Calle Falsa 123",
       fechaCompra: "2026-05-03",
       valorCompra: 120000,
       despachoGenerado: true
     },
     {
-      idVenta: "V-1003",
+      idVenta: "5",
       direccionCompra: "Paseo del Prado 45",
       fechaCompra: "2026-05-05",
       valorCompra: 76000,
