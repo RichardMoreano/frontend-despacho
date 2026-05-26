@@ -6,8 +6,8 @@ import { FormCierreDespacho } from "./FormCierreDespacho";
 export const TableDespachos = () => {
   const sampleDespachos = [
     {
-      idDespacho: "D-2001",
-      idCompra: "V-1002",
+      idDespacho: "1",
+      idCompra: "3",
       direccionCompra: "Calle Falsa 123",
       fechaDespacho: "2026-05-04",
       patenteCamion: "AB-1234",
@@ -15,8 +15,8 @@ export const TableDespachos = () => {
       intento: 1
     },
     {
-      idDespacho: "D-2002",
-      idCompra: "V-1001",
+      idDespacho: "2",
+      idCompra: "4",
       direccionCompra: "Av. Siempre Viva 742",
       fechaDespacho: "2026-05-06",
       patenteCamion: "CD-5678",
@@ -24,8 +24,8 @@ export const TableDespachos = () => {
       intento: 2
     },
     {
-      idDespacho: "D-2003",
-      idCompra: "V-1003",
+      idDespacho: "3",
+      idCompra: "5",
       direccionCompra: "Paseo del Prado 45",
       fechaDespacho: "2026-05-07",
       patenteCamion: "EF-9012",
